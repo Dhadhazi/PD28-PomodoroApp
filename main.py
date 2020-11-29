@@ -10,8 +10,16 @@ WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
+timer = None
 
-# ---------------------------- TIMER RESET ------------------------------- # 
+# ---------------------------- TIMER RESET ------------------------------- #
+
+
+def reset_timer():
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="00:00")
+    timer_label.config(text="Timer")
+    checkmarks_label.config(text="")
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
 
@@ -42,12 +50,20 @@ def check_if_zero_needed(num):
 
 
 def count_down(count):
+    global timer
     count_min = math.floor(count/60)
     count_sec = count % 60
 
     canvas.itemconfig(timer_text, text=f"{check_if_zero_needed(count_min)}:{check_if_zero_needed(count_sec)}")
     if count > 0:
-        window.after(1000, count_down, count-1)
+        timer = window.after(1000, count_down, count-1)
+    else:
+        start_timer()
+        mark = ""
+        finished_work_sessions = math.floor(reps/2)
+        for _ in range(finished_work_sessions):
+            mark += "✔"
+        checkmarks_label.config(text=mark)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -62,8 +78,8 @@ canvas.create_image(100, 112, image=tomato_image)
 timer_text = canvas.create_text(100, 130, text="00:00", fill="white", font=(FONT_NAME, 35, "bold"))
 canvas.grid(column=1, row=1)
 
-checkmark_label = Label(text="✓", fg=GREEN, bg=YELLOW)
-checkmark_label.grid(column=1, row=4)
+checkmarks_label = Label(fg=GREEN, bg=YELLOW)
+checkmarks_label.grid(column=1, row=4)
 
 timer_label = Label(text="Timer", font=(FONT_NAME, 50), fg=GREEN, bg=YELLOW)
 timer_label.grid(column=1, row=0)
@@ -71,7 +87,7 @@ timer_label.grid(column=1, row=0)
 start_button = Button(text="Start", highlightthickness=0, command=start_timer)
 start_button.grid(column=0, row=2)
 
-reset_button = Button(text="Reset", highlightthickness=0)
+reset_button = Button(text="Reset", highlightthickness=0, command=reset_timer)
 reset_button.grid(column=2, row=2)
 
 window.mainloop()
